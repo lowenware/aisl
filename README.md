@@ -5,36 +5,17 @@ Asynchronous Internet Server Library
 
 1. Add repository
 ```
-cd ~
-wget http://lowenware.com/rpm/redhat-7/lowenware.repo
-sudo mv lowenware.repo /etc/yum.repos.d/
+sudo curl -o /etc/yum.repos.d/lowenware.repo https://lowenware.com/rpm/redhat-7/lowenware.repo
 ```
 
 2. Import GPG key
 ```
-sudo rpm --import http://lowenware.com/rpm/RPM-GPG-KEY-Lowenware
+sudo rpm --import https://lowenware.com/rpm/RPM-GPG-KEY-Lowenware
 ```
 
 3. Install
 ```
 sudo yum install aisl aisl-devel
-```
-
-## Installation on OpenSUSE Tumbleweed
-
-1. Add repository
-```
-sudo zypper ar http://lowenware.com/rpm/opensuse-tumbleweed/lowenware.repo
-```
-
-2. Import GPG key
-```
-sudo rpm --import http://lowenware.com/rpm/RPM-GPG-KEY-Lowenware
-```
-
-3. Install
-```
-sudo zypper install aisl aisl-devel
 ```
 
 ## Installation from sources on any distro
