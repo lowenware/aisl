@@ -1,0 +1,36 @@
+name = AISL
+todo = aisl.todo
+handbook = handbook.md
+version:
+  major = 0
+  minor = 0
+
+include = 
+definitions = 
+
+profile:
+  name = debug
+  flags = -Wall -Werror
+  definitions =
+
+profile:
+  name = release
+  flags =
+  definitions =
+
+
+
+library:
+  output = aisl
+  compiler = gcc
+
+  version:
+    major = $version.major
+    minor = $version.minor
+    tweak = 0
+    build = auto
+
+  sources = library/aisl.c,
+            library/buffer.c
+
+

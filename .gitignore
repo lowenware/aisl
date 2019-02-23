@@ -1,0 +1,26 @@
+# Binaries
+
+build/*
+root/*
+demo/*
+
+bin/*
+obj/*
+webstuff-*
+Makefile
+tmp
+tmp/*
+*.tar.gz
+*.zip
+*.rar
+*.gz
+*.bz2
+pkg/*
+
+include/webstuff_bak
+
+CMakeCache.txt
+CMakeFiles/*
+cmake_install.cmake
+libaisl.dylib
+demo/demo

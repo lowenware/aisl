@@ -1,0 +1,7 @@
+
+if(DEFINED CMAKE_DEBUG)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror ")
+    add_definitions(
+      -DDEBUG
+    )
+endif()
