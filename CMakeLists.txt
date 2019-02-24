@@ -72,7 +72,7 @@ set ( LIBRARY_SOURCES library/aisl.c
 
 set ( DEMO_SOURCES demo/main.c demo/events.c demo/urls.c )
 
-set ( META_FILES README.md LICENSE AUTHORS)
+set ( META_FILES README.md LICENSE.md AUTHORS.md)
 
 #if( DEFINED WITH_TEMPLIGHT )
 #  set(SOURCE_FILES ${SOURCE_FILES} ${SOURCES_DIR}/templight.c)
