@@ -1,0 +1,8 @@
+# Release 1.0.0
+
+By Ilja Kartašov <ik@lowenware.com>, 2019-06-02
+
+1. Library release with new and final API and documented code.
+2. Previous version is being called `aisl-legacy` and will be maintained in 
+security aspects in branch called `legacy` until all applications using it will
+be updated.

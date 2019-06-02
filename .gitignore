@@ -3,11 +3,11 @@
 build/*
 root/*
 demo/*
+doc/html/*
 
 bin/*
 obj/*
 webstuff-*
-Makefile
 tmp
 tmp/*
 *.tar.gz
@@ -16,6 +16,8 @@ tmp/*
 *.gz
 *.bz2
 pkg/*
+doc/html
+vgcore.*
 
 include/webstuff_bak
 
