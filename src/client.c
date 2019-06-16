@@ -47,13 +47,16 @@ aisl_client_parse(AislClient client, char *data, int32_t size)
 	AislStream s = client->stream;
 	ParserStatus p = HTTP_PARSER_SUCCESS;
 
-	int32_t bytes_left = size;
+	int32_t data_size;
 
 	switch (client->http_version) {
 	case AISL_HTTP_0_9:
 	case AISL_HTTP_1_0:
 	case AISL_HTTP_1_1:
 		while (p == HTTP_PARSER_SUCCESS) {
+			data_size = size;
+			DPRINTF("parse %d bytes", data_size);
+
 			switch (aisl_stream_get_state(s)) {
 			case AISL_STREAM_STATE_IDLE:
 				p = http_10_parse_request(data, &size, client->stream);
@@ -68,13 +71,13 @@ aisl_client_parse(AislClient client, char *data, int32_t size)
 				break;
 
 			default: /* has input data, but request was already parsed */
+				DPRINTF("misleading request length");
 				p = HTTP_PARSER_ERROR;
 				continue;
 			}
 			// size now has number of parsed bytes
-			data += size;
-			bytes_left -= size;
-			size = bytes_left;
+			DPRINTF("%d bytes parsed, %d bytes left", (data_size - size), size);
+			data += (data_size - size);
 		}
 		break;
 
@@ -104,8 +107,7 @@ aisl_client_parse(AislClient client, char *data, int32_t size)
 		break;
 	}
 
-	if (size)
-		buffer_shift(&client->in, client->in.used - size); /* reset buffer */
+	buffer_shift(&client->in, client->in.used - size); /* reset buffer */
 
 	return result;
 }

@@ -124,12 +124,14 @@ http_10_parse_request(char *data, int32_t *p_size, AislStream stream)
 			break;
 
 		case ':':
-			if (uri && !host)
+			if (uri && !host) {
 				host = data+3;
-			else if (host && !port)
+			} else if (host && !port) {
 				port = data+1;
-			else if (version)
+			} else if (version) {
+				DPRINTF("bad character in HTTP version (%c)", *data);
 				return HTTP_PARSER_ERROR;
+			}
 			break;
 
 		case '/':
@@ -138,15 +140,18 @@ http_10_parse_request(char *data, int32_t *p_size, AislStream stream)
 				if (!uri)
 					uri = path;
 			} else if (version && data-version != 4) {
+				DPRINTF("wrong HTTP version length");
 				return HTTP_PARSER_ERROR;
 			}
 			break;
 
 		case '?':
-			if (!query)
+			if (!query) {
 				query = data+1;
-			else if (version)
+			} else if (version) {
+				DPRINTF("bad character in HTTP version (%c)", *data);
 				return HTTP_PARSER_ERROR;
+			}
 			break;
 
 		case '\n':
@@ -154,54 +159,68 @@ http_10_parse_request(char *data, int32_t *p_size, AislStream stream)
 			break;
 
 		case '\r':
-			if (!version)
+			if (!version) {
+				DPRINTF("unexpected end of HTTP request");
 				return HTTP_PARSER_ERROR;
+			}
 			break;
 
 		default:
-			if (!uri && method_end)
+			if (!uri && method_end) {
 				uri = data;
-			else if (!version && uri_end)
+			} else if (!version && uri_end) {
 				version = data;
-			else if (version && data-version > 7)
+			} else if (version && data-version > 7) {
+				DPRINTF("bad HTTP version length");
 				return HTTP_PARSER_ERROR;
+			}
 		}
 		data++;
 	}
 
-	/* STEP 2. Verifly splitting was completed */
+	/* STEP 2. Verify splitting was completed */
 
 	/* Was request sent? */
 	if (!newline)
 		return HTTP_PARSER_HUNGRY;
 
 	/* Check mandatory parts presence */
-	if (!method_end || !path || !uri_end || !version)
+	if (!method_end || !path || !uri_end || !version) {
+		DPRINTF("parser error: method=%d, path=%d, uri_end=%d, version=%d",
+				(method_end ? 1 : 0), (path ? 1 : 0), (uri_end ? 1 : 0),
+				(version ? 1: 0));
 		return HTTP_PARSER_ERROR;
+	}
 
 	*method_end = 0;
 	*newline    = 0;
 	*uri_end    = 0;
 
 	http_method = http_method_from_string(method, method_end - method);
-	if (http_method == AISL_HTTP_METHOD_UNKNOWN)
+	if (http_method == AISL_HTTP_METHOD_UNKNOWN) {
+		DPRINTF("invalid HTTP method");
 		return HTTP_PARSER_ERROR;
+	}
 
-	if ((http_version = http_version_from_string(version))==0)
+	if ((http_version = http_version_from_string(version))==0) {
+		DPRINTF("invalid HTTP version");
 		return HTTP_PARSER_ERROR;
+	}
 
 	if (query) {
-		*(query-1)=0;
+		*(query - 1) = 0;
 	} else {
 		query = uri_end;
 	}
 
 	if (host) {
-		if (strncmp(uri, "http://", 7) || strncmp(uri, "https://", 8))
+		if (strncmp(uri, "http://", 7) || strncmp(uri, "https://", 8)) {
+			DPRINTF("invalid HTTP uri");
 			return HTTP_PARSER_ERROR;
+		}
 	
 		if (port)
-			*(port-1)=0;
+			*(port - 1) = 0;
 	}
 
 	stream->client->http_version = http_version;
@@ -210,7 +229,7 @@ http_10_parse_request(char *data, int32_t *p_size, AislStream stream)
 	if (host)
 		aisl_stream_set_header(stream, "host", host);
 	/* how many characters has been read */
-	*(p_size)-=size;
+	*(p_size) = size;
 	return HTTP_PARSER_SUCCESS;
 }
 
@@ -225,6 +244,9 @@ http_10_parse_header(char *data, int32_t *p_size, AislStream stream)
 			 *val_end = NULL,
 			 *newline = NULL;
 
+
+	DPRINTF("parse header: %p, %d, %02X %02X", data, *p_size, *data & 0xFF, *(data+1) & 0xFF);
+
 	while(!newline && size-- ) {
 		switch(*data) {
 		case ' ':
@@ -234,8 +256,10 @@ http_10_parse_header(char *data, int32_t *p_size, AislStream stream)
 
 		case ':':
 			if (!colon) {
-				if (colon == key)
+				if (colon == key) {
+					DPRINTF("parser error: nameless HTTP header");
 					return HTTP_PARSER_ERROR;
+				}
 
 				colon = data;
 			}
@@ -266,17 +290,21 @@ http_10_parse_header(char *data, int32_t *p_size, AislStream stream)
 	if (!newline)
 		return HTTP_PARSER_HUNGRY;
 
+	DPRINTF("(%p == %p); *key == 0x%02x", newline, key, *key & 0xFF);
+
 	if (colon && val && val_end) {
 		*colon   = 0;
 		*val_end = 0;
 		aisl_stream_set_header(stream, key, val);
-		*p_size -= size;
+		*p_size = size;
 		return HTTP_PARSER_SUCCESS;
 	} else if (newline == key || (newline == key+1 && *key == '\r')) {
-		*p_size -= size;
+		*p_size = size;
+		DPRINTF("end of headers received");
 		return (aisl_stream_set_end_of_headers(stream) == 0) ?
 		  HTTP_PARSER_SUCCESS : HTTP_PARSER_READY;
 	}
+	DPRINTF("parser error: invalid HTTP header");
 	return HTTP_PARSER_ERROR;
 }
 
@@ -289,10 +317,13 @@ http_10_parse_body(char *data, int32_t *p_size, AislStream stream)
 	if (!size)
 		return HTTP_PARSER_HUNGRY;
 
+	*p_size = 0;
+
 	switch (aisl_stream_set_body(stream, data, size)) {
 	case  0:
 		return HTTP_PARSER_READY;
 	case -1:
+		DPRINTF("parser error: invalid HTTP body length");
 		return HTTP_PARSER_ERROR;
 	default:
 		return HTTP_PARSER_SUCCESS;

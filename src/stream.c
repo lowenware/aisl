@@ -162,9 +162,12 @@ aisl_stream_set_end_of_headers(AislStream stream)
 {
 	int result;
 
+	DPRINTF("content-length: %d", stream->content_length);
+
 	if (stream->state == AISL_STREAM_STATE_WAIT_HEADER) {
-		stream->state = AISL_STREAM_STATE_WAIT_BODY;
-		result = (stream->content_length == 0);
+		result = (stream->content_length > 0);
+		stream->state = (!result) ? AISL_STREAM_STATE_READY :
+			AISL_STREAM_STATE_WAIT_BODY;
 	} else {
 		result = 2;
 	}
