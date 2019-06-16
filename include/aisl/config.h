@@ -57,8 +57,8 @@ struct aisl_cfg
 	AislCallback callback;         /**< A pointer to #AislCallback event handler */
 	void *p_ctx;                   /**< User defined context for #AislCallback */
 
-	struct aisl_cfg_srv *srv;      /**< A pointer to array of #aisl_cfg_srv */
-	struct aisl_cfg_ssl *ssl;      /**< A pointer to array of #aisl_cfg_ssl  */
+	const struct aisl_cfg_srv *srv;      /**< A pointer to array of #aisl_cfg_srv */
+	const struct aisl_cfg_ssl *ssl;      /**< A pointer to array of #aisl_cfg_ssl  */
 
 	int srv_cnt;                   /**< Size of #aisl_cfg_srv array */
 	int ssl_cnt;                   /**< Size of #aisl_cfg_ssl array */
