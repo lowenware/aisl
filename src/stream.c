@@ -243,6 +243,14 @@ aisl_set_context(AislStream s, void *u_ptr)
 
 
 __attribute__ ((visibility ("default") ))
+bool
+aisl_is_secure(AislStream stream)
+{
+	return aisl_client_is_secure(stream->client);
+}
+
+
+__attribute__ ((visibility ("default") ))
 AislClient
 aisl_get_client(AislStream s)
 {
