@@ -16,7 +16,7 @@
 #ifndef AISL_INSTANCE_H_814CF474_A646_45B7_B6B2_3F4C7BEFA484
 #define AISL_INSTANCE_H_814CF474_A646_45B7_B6B2_3F4C7BEFA484
 
-#ifndef AISL_WITHOUT_SSL
+#if AISL_WITH_SSL == 1
 #include <openssl/ssl.h>
 #endif
 
@@ -27,7 +27,7 @@
 
 struct aisl_instance {
 	AislServer  *srv;
-	#ifndef AISL_WITHOUT_SSL
+	#if AISL_WITH_SSL == 1
 	struct aisl_ssl * *ssl;
 	#endif
 	struct list  client_spool;
@@ -40,7 +40,7 @@ struct aisl_instance {
 };
 
 
-#ifndef AISL_WITHOUT_SSL
+#if AISL_WITH_SSL == 1
 /**
  * @brief Gets SSL context for appropriate server name.
  * @param instance a pointer to #AislInstance instance.

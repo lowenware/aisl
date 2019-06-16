@@ -20,10 +20,6 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
-#ifndef AISL_WITHOUT_SSL
-#include <openssl/ssl.h>
-#endif
-
 #define AISL_AUTO_LENGTH (~0)
 
 /** type casts */
@@ -54,7 +50,6 @@ typedef enum {
 	, AISL_IDLE           = 1
 } AislStatus;
 
-#ifndef WITHOUT_STRINGIFIERS
 
 /** @brief Converts #AislStatus code to a null terminated string
  *  @param status an #AislStatus code
@@ -62,8 +57,6 @@ typedef enum {
  */
 const char *
 aisl_status_to_string(AislStatus status);
-
-#endif
 
 
 /** @brief HTTP version enumeration */
@@ -223,16 +216,11 @@ struct aisl_evt_input {
 };
 
 
-#ifndef WITHOUT_STRINGIFIERS
-
-
 /** @brief Converts #AislEvent code to a null terminated string
  *  @param evt an #AislEvent code
  *  @return pointer to the string representing #AislEvent
  */
 const char *
 aisl_event_to_string(AislEvent evt);
-
-#endif
 
 #endif /* !AISL_TYPES_H */

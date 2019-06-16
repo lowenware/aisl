@@ -157,7 +157,7 @@ aisl_server_get_address(AislServer server, struct sockaddr_in *address)
 }
 
 
-#ifndef AISL_WITHOUT_SSL
+#if AISL_WITH_SSL == 1
 
 __attribute__ ((visibility ("default") ))
 bool

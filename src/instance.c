@@ -15,7 +15,7 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
-#ifndef AISL_WITHOUT_SSL
+#if AISL_WITH_SSL == 1
 #include <openssl/err.h>
 #endif
 
@@ -28,7 +28,7 @@
 #include "instance.h"
 
 
-#ifndef AISL_WITHOUT_SSL
+#if AISL_WITH_SSL == 1
 
 static uint32_t m_instances = 0;
 
@@ -89,7 +89,7 @@ aisl_new(const struct aisl_cfg *cfg)
 			goto release;
 	}
 
-	#ifndef AISL_WITHOUT_SSL
+	#if AISL_WITH_SSL == 1
 	if ((m_instances++) == 0) {
 		SSL_load_error_strings();
 		OpenSSL_add_ssl_algorithms();
@@ -140,7 +140,7 @@ aisl_free(AislInstance instance)
 
 	list_release(&instance->client_spool, (list_destructor_t)aisl_client_free);
 
-	#ifndef AISL_WITHOUT_SSL
+	#if AISL_WITH_SSL == 1
 	if (instance->ssl) {
 		struct aisl_ssl **ssl = instance->ssl;
 
@@ -159,7 +159,7 @@ aisl_free(AislInstance instance)
 }
 
 
-#ifndef AISL_WITHOUT_SSL
+#if AISL_WITH_SSL == 1
 
 SSL_CTX *
 aisl_get_ssl_ctx(AislInstance instance, const char * host)
@@ -185,10 +185,10 @@ aisl_get_ssl_ctx(AislInstance instance, const char * host)
 void
 aisl_raise_evt(AislInstance instance, const struct aisl_evt *evt)
 {
-	#ifdef AISL_WITHOUT_STRINGIFIERS
-	DPRINTF("! %d", evt->code);
-	#else
+	#if AISL_WITH_STRINGIFIERS == 1
 	DPRINTF("! %s", aisl_event_to_string(evt->code));
+	#else
+	DPRINTF("! %d", evt->code);
 	#endif
 
 	if (instance->callback)

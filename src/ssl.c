@@ -11,7 +11,7 @@
 #include "ssl.h"
 
 
-#ifndef AISL_WITHOUT_SSL
+#if AISL_WITH_SSL == 1
 
 
 static int

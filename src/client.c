@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#ifndef AISL_WITHOUT_SSL
+#if AISL_WITH_SSL == 1
 #include <openssl/err.h>
 #endif
 
@@ -124,7 +124,7 @@ aisl_client_input(AislClient client)
 	char *data = &client->in.data[ client->in.used ];
 	int32_t size = client->in.size - client->in.used;
 
-	#ifndef AISL_WITHOUT_SSL
+	#if AISL_WITH_SSL == 1
 	if (client->ssl) {
 		DPRINTF("SSL_read");
 		if (!(client->flags & FLAG_HANDSHAKE)) {
@@ -157,7 +157,7 @@ aisl_client_input(AislClient client)
 		return aisl_client_parse(client, data, size);
 	} else if (l<0) {
 
-		#ifndef AISL_WITHOUT_SSL
+		#if AISL_WITH_SSL == 1
 		if (client->ssl) {
 			if (SSL_get_error(client->ssl, l) == SSL_ERROR_WANT_READ)
 				return AISL_IDLE;
@@ -217,17 +217,16 @@ aisl_client_output(AislClient client)
 	if ( !l )
 		return AISL_IDLE;
 
-	#ifdef AISL_WITHOUT_SSL
-	l = send( client->fd,  data, l, 0);
+	#if AISL_WITH_SSL == 1
+	l = (client->ssl) ?  SSL_write(client->ssl, data, l) :
+		send(client->fd,  data, l, 0);
 	#else
-	l = (client->ssl) ?
-				SSL_write(client->ssl, data, l) :
-				send(     client->fd,  data, l, 0);
+	l = send(client->fd,  data, l, 0);
 	#endif
 
 	if (l > 0) {
 		aisl_stream_shift(s, l);
-		if ( aisl_stream_is_done(s) ) {
+		if (aisl_stream_is_done(s)) {
 			/* data has been sent */
 			if (client->flags & FLAG_KEEPALIVE) {
 				aisl_stream_free(s);
@@ -236,8 +235,8 @@ aisl_client_output(AislClient client)
 				if (client->stream != NULL )
 					return AISL_SUCCESS;
 
-				/* in case of malloc error it will not be error as long as request was
-				 * handled and we just close the connection.
+				/* in case of malloc error it will not be an error as long as the 
+				 * request was handled and we just close the connection.
 				 */
 			}
 
@@ -248,7 +247,7 @@ aisl_client_output(AislClient client)
 	}
 
 	/* l < 0 */
-	#ifndef AISL_WITHOUT_SSL
+	#if AISL_WITH_SSL == 1
 	if (client->ssl) {
 		if (SSL_get_error(client->ssl, l) == SSL_ERROR_WANT_WRITE)
 			return AISL_IDLE;
@@ -290,7 +289,7 @@ aisl_client_new(AislServer server, int fd, struct sockaddr_in *addr)
 				client->stream = stream;
 				DPRINTF("client stream alocated");
 
-				#ifndef AISL_WITHOUT_SSL
+				#if AISL_WITH_SSL == 1
 				if (server->ssl) {
 					SSL_CTX * ssl_ctx = aisl_get_ssl_ctx(server->instance, NULL);
 
@@ -317,7 +316,7 @@ aisl_client_free(AislClient client)
 {
 	aisl_client_close(client, AISL_SUCCESS);
 
-	#ifndef AISL_WITHOUT_SSL
+	#if AISL_WITH_SSL == 1
 	if (client->ssl)
 		SSL_free(client->ssl);
 	#endif
@@ -408,10 +407,10 @@ __attribute__ ((visibility ("default") ))
 bool
 aisl_client_is_secure(AislClient client)
 {
-	#ifdef AISL_WITHOUT_SSL
-	return false;
-	#else
+	#if AISL_WITH_SSL == 1
 	return (client->ssl == NULL) ? false : true;
+	#else
+	return false;
 	#endif
 }
 

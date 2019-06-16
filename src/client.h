@@ -17,6 +17,10 @@
 
 #include <arpa/inet.h>
 
+#if AISL_WITH_SSL == 1
+#include <openssl/ssl.h>
+#endif
+
 #include <aisl/client.h>
 #include "buffer.h"
 
@@ -29,7 +33,7 @@ struct aisl_client {
 	struct buffer       out;           /**< Client's output buffer. */
 	AislServer          server;        /**< Server instance. */
 	AislStream          stream;        /**< Pending client's stream. */
-	#ifndef AISL_WITHOUT_SSL
+	#if AISL_WITH_SSL == 1
 	SSL                *ssl;           /**< SSL pointer for HTTPS. */
 	#endif
 	time_t              timestamp;     /**< Last communication timestamp. */

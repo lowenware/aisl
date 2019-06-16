@@ -24,7 +24,7 @@ examples: library hello_world
 
 hello_world:
 	$(info compiling: hello world)
-	$(CC) $(EXAMPLES_CFLAGS)  \
+	@$(CC) $(EXAMPLES_CFLAGS)  \
      -o $(OUT_DIR)/hello-world $(EXAMPLES_DIR)/hello-world.c $(EXAMPLES_LDFLAGS)
 
 # vim:ft=make

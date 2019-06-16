@@ -16,7 +16,7 @@
 #include <aisl/types.h>
 
 
-#ifndef WITHOUT_STRINGIFIERS
+#if AISL_WITH_STRINGIFIERS == 1
 
 __attribute__ ((visibility ("default") ))
 const char *
