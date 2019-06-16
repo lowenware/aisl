@@ -70,13 +70,10 @@ clean:
 	@rm -Rf $(OUT_DIR)
 	@rm -Rf ./vgcore.*
 
-doc:
-	doxygen doc/api-reference.conf
-
-all: library examples doc
+all: library examples
 
 default: library
-.PHONY:  all dirs clean doc install
+.PHONY:  all dirs clean install
 
 install: library
 	$(info installing files)
