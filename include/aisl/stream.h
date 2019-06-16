@@ -19,6 +19,7 @@
 #include <stdarg.h>
 #include <aisl/types.h>
 
+#define aisl_stream_get_instance aisl_get_instance
 
 /** @brief Gets a value of #AislStream security flag
  *  @param stream an #AislStream instance
@@ -57,7 +58,7 @@ aisl_get_http_version(AislStream stream);
  *  @return an #AislInstance pointer
  */
 AislInstance
-aisl_stream_get_instance(AislStream s);
+aisl_get_instance(AislStream s);
 
 
 /** @brief Gets the stream context previously set with #aisl_set_context

@@ -24,7 +24,7 @@ static void
 aisl_stream_reset(AislStream stream, bool initial)
 {
 	if (!initial) {
-		aisl_raise(aisl_stream_get_instance(stream), (void*) stream,
+		aisl_raise(aisl_get_instance(stream), (void*) stream,
 		  AISL_EVENT_STREAM_CLOSE, AISL_SUCCESS);
 	}
 
@@ -125,7 +125,7 @@ aisl_stream_set_request(AislStream      stream,
 	on_open.path        = path;
 	on_open.query       = query;
 
-	aisl_raise_evt(aisl_stream_get_instance(stream), (struct aisl_evt *)&on_open);
+	aisl_raise_evt(aisl_get_instance(stream), (struct aisl_evt *)&on_open);
 }
 
 
@@ -152,7 +152,7 @@ aisl_stream_set_header(AislStream stream, const char *key, const char *value)
 	on_header.key        = key;
 	on_header.value      = value;
 
-	aisl_raise_evt(aisl_stream_get_instance(stream),
+	aisl_raise_evt(aisl_get_instance(stream),
 	  (struct aisl_evt *) &on_header);
 }
 
@@ -580,7 +580,7 @@ aisl_puts(const char *str, AislStream stream)
 
 __attribute__ ((visibility ("default") ))
 AislInstance
-aisl_stream_get_instance(AislStream stream)
+aisl_get_instance(AislStream stream)
 {
 	return stream->client->server->instance;
 }
