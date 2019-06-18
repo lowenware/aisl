@@ -18,18 +18,11 @@
 
 #include <aisl/types.h>
 
-#define AISL_CFG_DEFAULT { \
-		.callback               = NULL  \
-	, .p_ctx                  = NULL  \
-	, .srv                    = NULL  \
-	, .ssl                    = NULL  \
-	, .srv_cnt                = 0     \
-	, .ssl_cnt                = 0     \
-	, .client_spool_size      = 32    \
+#define AISL_CFG_DEFAULTS \
+	  .client_spool_size      = 32    \
 	, .initial_buffer_size    = 16536 \
 	, .client_accept_limit    = 1024  \
 	, .client_silence_timeout = 30    \
-}                                   \
 
 
 /** @brief Server configuration structure
@@ -52,8 +45,7 @@ struct aisl_cfg_ssl {
 
 /** @brief AISL initial configuration structure
  */
-struct aisl_cfg
-{
+struct aisl_cfg {
 	AislCallback callback;         /**< A pointer to #AislCallback event handler */
 	void *p_ctx;                   /**< User defined context for #AislCallback */
 

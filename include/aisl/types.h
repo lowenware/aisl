@@ -96,7 +96,7 @@ typedef enum {
  *  @return pointer to the string representing #AislHttpMethod
  */
 const char *
-aisl_http_method_to_string( AislHttpMethod method );
+aisl_http_method_to_string(AislHttpMethod method);
 
 
 /** @brief HTTP response status enumeration */
@@ -154,7 +154,7 @@ typedef enum {
  *  @return pointer to the string representing #AislHttpResponse
  */
 const char *
-aisl_http_response_to_string( AislHttpResponse code );
+aisl_http_response_to_string(AislHttpResponse code);
 
 
 /** @brief AISL events enumeration */

@@ -21,6 +21,28 @@
 
 
 static void
+hello_world(const struct aisl_evt *evt, void *p_ctx);
+
+
+static const struct aisl_cfg_srv m_srv[] = {{
+	.host   = "0.0.0.0",
+	.port   = 8080,
+	.secure = false
+}};
+
+
+static const struct aisl_cfg m_cfg = {
+	  AISL_CFG_DEFAULTS
+	, .srv = m_srv
+	, .srv_cnt = sizeof (m_srv) / sizeof (m_srv[0])
+	, .ssl = NULL
+	, .ssl_cnt = 0
+	, .callback = hello_world
+	, .p_ctx = NULL
+};
+
+
+static void
 hello_world(const struct aisl_evt *evt, void *p_ctx)
 {
 	AislStream s;
@@ -56,25 +78,13 @@ hello_world(const struct aisl_evt *evt, void *p_ctx)
 
 
 int
-main(int argc, char ** argv)
+main(int argc, char **argv)
 {
 	AislInstance aisl;    /**< AISL instance pointer */
 	AislStatus status;  /**< AISL status code */
 
-	const struct aisl_cfg_srv srv[] = {{
-		.host   = "0.0.0.0",
-		.port   = 8080,
-		.secure = false
-	}};
-
-	struct aisl_cfg cfg = AISL_CFG_DEFAULT;
-
-	cfg.srv      = srv;
-	cfg.srv_cnt  = sizeof (srv) / sizeof (srv[0]);
-	cfg.callback = hello_world;
-
 	/* Initialize instance */
-	if ( (aisl = aisl_new(&cfg)) != NULL ) {
+	if ( (aisl = aisl_new(&m_cfg)) != NULL ) {
 		/* launch application loop */
 		fprintf(stdout, "Entering main loop\n" );
 		for(;;) {
