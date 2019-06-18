@@ -1,36 +1,32 @@
 # AISL
-Asynchronous Internet Server Library
 
-## Installation on CentOS 7 / RedHat 7
+Asynchronous Internet Server Library provides innovative way of web development.
+AISL based applications have built-in web server giving full control of client
+serving. All you need to know is a request string? - Start prepare the response 
+without waiting for headers and body! Don't need some headers? - Don't save them
+in memory! Unwanted content-body? - simply ignore it!
 
-1. Add repository
-```
-sudo curl -o /etc/yum.repos.d/lowenware.repo https://lowenware.com/rpm/redhat-7/lowenware.repo
-```
+## Documentation
 
-2. Import GPG key
-```
-sudo rpm --import https://lowenware.com/rpm/RPM-GPG-KEY-Lowenware
-```
+[Hello World](https://lowenware.com/aisl/handbook.html#getting-started) example
+and full [API reference](https://lowenware.com/aisl/handbook.html#api-reference)
+can be found in an oficial [AISL HandBook](https://lowenware.com/aisl/handbook.html).
 
-3. Install
-```
-sudo yum install aisl aisl-devel
-```
+## Installation
 
-## Installation from sources on any distro
-
-1. Configuration
 ```
-cmake -DCMAKE_INSTALL_PREFIX=/usr/local
+$ make PREFIX=/usr/local
+$ sudo make PREFIX=/usr/local install
+$ sudo cp libaisl.pc.example /usr/lib/pkgconfig/libaisl.pc
 ```
 
-2. Compilation
+ArchLinux users can install from [AUR](https://aur.archlinux.org/packages/aisl-git/) :
+
 ```
-make
+$ yaourt -S aisl-git
 ```
 
-3. Installation
-```
-sudo make install
-```
+## License
+
+AISL is free for both commercial and non-commercial use, being distributed under
+terms of [CC BY-ND 4.0](https://creativecommons.org/licenses/by-nd/4.0/).
