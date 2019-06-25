@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "debug.h"
 #include "buffer.h"
 
 
@@ -25,10 +26,8 @@ buffer_set_size(struct buffer *buffer, int32_t new_size)
 		char *data;
 
 		if (new_size) {
-			int32_t s = new_size / 1024;
-
 			if ( new_size % 1024 ) {
-				new_size = (s+1) * 1024;
+				new_size = (new_size / 1024 + 1) * 1024;
 			}
 		} else {
 			new_size = 16*1024; 
@@ -84,14 +83,14 @@ buffer_move_offset(struct buffer *buffer, int32_t offset, int32_t size)
 }
 
 int32_t
-buffer_insert(struct buffer *buffer,
-              int32_t        offset,
-              const char    *data,
-              int32_t        size)
+buffer_insert(struct buffer *buffer, int32_t offset, const char *data,
+		int32_t size)
 {
 	int32_t result;
 
-	if ( (result = buffer_set_size(buffer, size)) != -1) {
+	DPRINTF("INSERT (%s) %d bytes after %d", data, size, offset);
+
+	if ( (result = buffer_set_size(buffer, buffer->size + size)) != -1) {
 		if ((result = buffer_move_offset(buffer, offset, size)) != -1) {
 			memcpy(&buffer->data[offset], data, size);
 			buffer->used += result;
