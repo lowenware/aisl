@@ -22,12 +22,12 @@
 static int32_t
 buffer_set_size(struct buffer *buffer, int32_t new_size)
 {
-	if (new_size != buffer->size) {
+	if (!buffer->size || new_size != buffer->size) {
 		char *data;
 
 		if (new_size) {
-			if ( new_size % 1024 ) {
-				new_size = (new_size / 1024 + 1) * 1024;
+			if (new_size % 4096) {
+				new_size = (new_size / 4096 + 1) * 4096;
 			}
 		} else {
 			new_size = 16*1024; 
@@ -48,7 +48,7 @@ buffer_set_size(struct buffer *buffer, int32_t new_size)
 int32_t
 buffer_init(struct buffer *buffer, int32_t size)
 {
-	if ( (size = buffer_set_size(buffer, size)) != -1)
+	if ((size = buffer_set_size(buffer, size)) != -1)
 		buffer->used = 0;
 
 	return size;
@@ -88,6 +88,8 @@ buffer_insert(struct buffer *buffer, int32_t offset, const char *data,
 {
 	int32_t result;
 
+	DPRINTF("Buffer: %d of %d", buffer->used, buffer->size);
+
 	if ( (result = buffer_set_size(buffer, buffer->size + size)) != -1) {
 		if ((result = buffer_move_offset(buffer, offset, size)) != -1) {
 			memcpy(&buffer->data[offset], data, size);
@@ -115,17 +117,18 @@ buffer_append_printf(struct buffer *buffer, const char *format, ...)
 int32_t
 buffer_append_vprintf(struct buffer *buffer, const char *format, va_list args)
 {
+	DPRINTF("Buffer: %d of %d", buffer->used, buffer->size);
 	int32_t space, result;
 	va_list cp_args;
 
 	va_copy(cp_args, args);
-	space = buffer->size - buffer->used,
+	space = buffer->size - buffer->used;
 	result = vsnprintf(&buffer->data[buffer->used], space, format, args);
 
 	if (result < space) { /* enough space */
 		buffer->used += result;
 	} else {
-		result = buffer_set_size(buffer, buffer->size + result - space);
+		result = buffer_set_size(buffer, buffer->size + result - space + 1);
 		if (result != -1)
 			result = buffer_append_vprintf(buffer, format, cp_args);
 	}
@@ -137,6 +140,7 @@ buffer_append_vprintf(struct buffer *buffer, const char *format, va_list args)
 int32_t
 buffer_append(struct buffer *buffer, const char *data, int32_t size)
 {
+	DPRINTF("Buffer: %d of %d", buffer->used, buffer->size);
 	int32_t used, space;
 	
 	used = buffer->used,
