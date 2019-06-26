@@ -55,7 +55,6 @@ aisl_client_parse(AislClient client, char *data, int32_t size)
 	case AISL_HTTP_1_1:
 		while (p == HTTP_PARSER_SUCCESS) {
 			data_size = size;
-			DPRINTF("parse %d bytes", data_size);
 
 			switch (aisl_stream_get_state(s)) {
 			case AISL_STREAM_STATE_IDLE:

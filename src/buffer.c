@@ -88,8 +88,6 @@ buffer_insert(struct buffer *buffer, int32_t offset, const char *data,
 {
 	int32_t result;
 
-	DPRINTF("INSERT (%s) %d bytes after %d", data, size, offset);
-
 	if ( (result = buffer_set_size(buffer, buffer->size + size)) != -1) {
 		if ((result = buffer_move_offset(buffer, offset, size)) != -1) {
 			memcpy(&buffer->data[offset], data, size);

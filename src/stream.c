@@ -31,7 +31,7 @@ aisl_stream_reset(AislStream stream, bool initial)
 	buffer_release(&stream->buffer);
 
 	stream->u_ptr          = NULL;
-	stream->content_length = AISL_AUTO_LENGTH;
+	stream->content_length = 0; //AISL_AUTO_LENGTH;
 	stream->head_offset    = 0;
 	stream->flags          = 0;
 	stream->state          = AISL_STREAM_STATE_IDLE;
@@ -162,10 +162,12 @@ aisl_stream_set_end_of_headers(AislStream stream)
 {
 	int result;
 
+	DPRINTF("stream->content_length == %"PRIu64"", stream->content_length);
+
 	if (stream->state == AISL_STREAM_STATE_WAIT_HEADER) {
-		result = (stream->content_length > 0);
-		stream->state = (!result) ? AISL_STREAM_STATE_READY :
-			AISL_STREAM_STATE_WAIT_BODY;
+		result = (stream->content_length != 0);
+		stream->state = (result) ? AISL_STREAM_STATE_WAIT_BODY :
+			AISL_STREAM_STATE_READY;
 	} else {
 		result = 2;
 	}

@@ -290,7 +290,7 @@ http_10_parse_header(char *data, int32_t *p_size, AislStream stream)
 	if (!newline)
 		return HTTP_PARSER_HUNGRY;
 
-	DPRINTF("(%p == %p); *key == 0x%02x", newline, key, *key & 0xFF);
+	/* DPRINTF("(%p == %p); *key == 0x%02x", newline, key, *key & 0xFF); */
 
 	if (colon && val && val_end) {
 		*colon   = 0;
@@ -302,7 +302,7 @@ http_10_parse_header(char *data, int32_t *p_size, AislStream stream)
 		*p_size = size;
 		DPRINTF("end of headers received");
 		return (aisl_stream_set_end_of_headers(stream) == 0) ?
-		  HTTP_PARSER_SUCCESS : HTTP_PARSER_READY;
+		  HTTP_PARSER_READY : HTTP_PARSER_SUCCESS;
 	}
 	DPRINTF("parser error: invalid HTTP header");
 	return HTTP_PARSER_ERROR;
