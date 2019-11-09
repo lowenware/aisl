@@ -4,23 +4,52 @@
 #
 .POSIX:
 
+TARGET_NAME = aisl
+
+# Version
+
+VERSION_MAJOR = 1
+VERSION_MINOR = 0
+VERSION_TWEAK = 5
+VERSION_LABEL = 0
+
 # Project directories
 SRC_DIR ?= src
-SDK_DIR ?= sdk
 OUT_DIR ?= build
-LIB_DIR ?= lib
 DESTDIR ?=
+PREFIX ?= /usr/local
 
-# Project definition
-include project.mk
+PKG_CONFIG ?= pkg-config
+
+# Source files
+
+SOURCE_FILES := \
+  $(SRC_DIR)/instance.c \
+  $(SRC_DIR)/server.c \
+  $(SRC_DIR)/client.c \
+  $(SRC_DIR)/stream.c \
+  $(SRC_DIR)/http.c \
+  $(SRC_DIR)/ssl.c \
+  $(SRC_DIR)/list.c \
+  $(SRC_DIR)/str-utils.c \
+  $(SRC_DIR)/buffer.c \
+  $(SRC_DIR)/types.c \
+
+
+# compilation macro options:
+
+AISL_WITH_DEBUG ?= 0            # disable debug output
+AISL_WITH_SSL   ?= 1            # enable SSL support
+AISL_WITH_STRINGIFIERS ?= 1     # enable *_to_string functions
+
 
 # Examples submodule
-include examples.mk
+# include examples.mk
 
 # CFLAGS
 
 CFLAGS := \
-  $(PROJECT_INCLUDES) \
+  $(CFLAGS) \
   -std=c99 \
   -pedantic \
   -Wall \
@@ -30,58 +59,64 @@ CFLAGS := \
   -O2 \
   -s \
   -fvisibility=hidden \
-  -DVERSION_MAJOR=$(PROJECT_VERSION_MAJOR) \
-  -DVERSION_MINOR=$(PROJECT_VERSION_MINOR) \
-  -DVERSION_TWEAK=$(PROJECT_VERSION_TWEAK) \
-  -DVERSION_LABEL=$(PROJECT_VERSION_LABEL) \
-  $(CPPFLAGS) \
-  $(CFLAGS) \
-  $(PROJECT_CFLAGS) \
+  -D_POSIX_C_SOURCE=200809L \
+  \
+  -DVERSION_MAJOR=$(VERSION_MAJOR) \
+  -DVERSION_MINOR=$(VERSION_MINOR) \
+  -DVERSION_TWEAK=$(VERSION_TWEAK) \
+  -DVERSION_LABEL=$(VERSION_LABEL) \
+  \
+  -DAISL_WITH_DEBUG=$(AISL_WITH_DEBUG) \
+  -DAISL_WITH_SSL=$(AISL_WITH_SSL) \
+  -DAISL_WITH_STRINGIFIERS=$(AISL_WITH_STRINGIFIERS) \
+  \
+  -I./ \
+  -I./include \
+
+ifeq (${AISL_WITH_SSL}, 1)
+  CFLAGS += `$(PKG_CONFIG) --cflags openssl`
+  LDFLAGS += `$(PKG_CONFIG) --libs openssl`
+endif
 
 
-LDFLAGS := \
-  $(PROJECT_LIBRARIES) \
-  $(LDFLAGS) \
-  $(PROJECT_LDFLAGS) \
+# Instructions
 
+SOURCE_LIST := $(wildcard $(SOURCE_FILES))
+SHARED_OBJS := $(addsuffix .o, $(addprefix $(OUT_DIR)/shared/, ${SOURCE_LIST}))
+STATIC_OBJS := $(addsuffix .o, $(addprefix $(OUT_DIR)/static/, ${SOURCE_LIST}))
 
-SOURCE_LIST := $(wildcard $(PROJECT_SOURCES))
-OBJECT_FILES := $(addprefix $(OUT_DIR)/o_, ${SOURCE_LIST:.c=.o})
+all: lib$(TARGET_NAME).so lib$(TARGET_NAME).a
+	$(info AISL_WITH_DEBUG=$(AISL_WITH_DEBUG))
+	$(info AISL_WITH_SSL=$(AISL_WITH_SSL))
+	$(info AISL_WITH_STRINGIFIERS=$(AISL_WITH_STRINGIFIERS))
 
-
-library: dirs $(OBJECT_FILES)
-	$(info linking target: $@)
-	@$(CC) -shared -o $(OUT_DIR)/lib$(PROJECT_NAME).so $(OBJECT_FILES) $(LDFLAGS)
+lib$(TARGET_NAME).so: Makefile $(SHARED_OBJS)
+	$(info building target: $@)
+	@$(CC) -shared -o $(OUT_DIR)/$@ $(SHARED_OBJS) $(LDFLAGS)
 	$(info done: $@)
 
+lib$(TARGET_NAME).a: Makefile $(STATIC_OBJS)
+	$(info building target: $@)
+	@$(AR) rcs $(OUT_DIR)/$@ $(STATIC_OBJS)
+	$(info done: $@)
 
-build/o_%.o: %.c
+$(OUT_DIR)/shared/%.o: %
 	$(info compiling file: $<)
+	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -fpic -c $< -o $@
 
-dirs:
-	$(info preparing: build folders)
-	@mkdir -p $(OUT_DIR)/o_$(SRC_DIR)
-	@mkdir -p $(OUT_DIR)/o_$(SDK_DIR)
+$(OUT_DIR)/static/%.o: %
+	$(info compiling file: $<)
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) -c $< -o $@
 
-
-clean:
-	$(info cleaning: build files)
-	@rm -Rf $(OUT_DIR)
-	@rm -Rf ./vgcore.*
-
-all: library examples
-
-default: library
-.PHONY:  all dirs clean install
-
-install: library
+install:lib$(TARGET_NAME).so lib$(TARGET_NAME).a
 	$(info installing files)
 	@mkdir -p $(DESTDIR)$(PREFIX)/$(LIB_DIR)
 	@mkdir -p $(DESTDIR)$(PREFIX)/include
-
-	@cp $(OUT_DIR)/lib$(PROJECT_NAME).so $(DESTDIR)$(PREFIX)/$(LIB_DIR)
+	@cp $(OUT_DIR)/lib$(LIBRARY_NAME).so $(DESTDIR)$(PREFIX)/$(LIB_DIR)
+	@cp $(OUT_DIR)/lib$(LIBRARY_NAME).a $(DESTDIR)$(PREFIX)/$(LIB_DIR)
 	@cp -R include/aisl $(DESTDIR)$(PREFIX)/include
 
-# vim:ft=make
-#
+clean:
+	rm -R ./$(OUT_DIR)/
