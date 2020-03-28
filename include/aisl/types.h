@@ -20,6 +20,8 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
+#define AISL_CONTEXT_MAGIC 0x4149534c
+
 #define AISL_AUTO_LENGTH (~0)
 
 /** type casts */
@@ -188,7 +190,7 @@ struct aisl_evt {
  *  @param ctx a pointer to a context defined by user (see #aisl_cfg)
  */
 typedef void
-(* AislCallback) (const struct aisl_evt *evt, void *ctx);
+(* AislCallback)(const struct aisl_evt *evt, void *ctx);
 
 
 /** @brief AISL event structue passed on stream opening */
@@ -215,12 +217,54 @@ struct aisl_evt_input {
 	int32_t           size;          /**< data array size */
 };
 
-
 /** @brief Converts #AislEvent code to a null terminated string
  *  @param evt an #AislEvent code
  *  @return pointer to the string representing #AislEvent
  */
 const char *
 aisl_event_to_string(AislEvent evt);
+
+// -----------------------------------------------------------------------------
+
+/** @brief optional AISL context structure */
+struct aisl_context {
+	uint32_t magic;                  /**< AISL_CONTEXT_MAGIC constant */
+	uint32_t module_id;              /**< optional module ID */
+};
+
+typedef struct config * AislModuleConfig;
+
+typedef AislHttpResponse
+(* AislStreamOpenCallback)(AislModuleConfig config, AislStream stream
+		, const char *path, const char *query , AislHttpMethod method);
+
+typedef void
+(* AislStreamHeaderCallback)(AislModuleConfig config, AislStream stream
+		, const char *key, const char *value);
+
+typedef void
+(* AislStreamInputCallback)(AislModuleConfig config, AislStream stream
+		, const char *data, int32_t size);
+
+typedef void
+(* AislStreamRequest)(AislModuleConfig config, AislStream stream);
+
+typedef void
+(* AislStreamOutputCallback)(AislModuleConfig config, AislStream stream);
+
+typedef void
+(* AislStreamClose)(AislModuleConfig config, AislStream stream);
+
+/** @brief optional AISL module structure */
+struct aisl_module {
+	const char *name;
+	AislStreamOpenCallback on_open;
+	AislStreamHeaderCallback on_header;
+	AislStreamInputCallback on_input;
+	AislStreamRequest on_request;
+	AislStreamOutputCallback on_output;
+	AislStreamClose on_close;
+	AislModuleConfig config;
+};
 
 #endif /* !AISL_TYPES_H */

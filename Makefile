@@ -9,8 +9,8 @@ TARGET_NAME = aisl
 # Version
 
 VERSION_MAJOR = 1
-VERSION_MINOR = 0
-VERSION_TWEAK = 5
+VERSION_MINOR = 1
+VERSION_TWEAK = 0
 VERSION_LABEL = 0
 
 # Project directories
@@ -110,6 +110,7 @@ $(OUT_DIR)/static/%.o: %
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -c $< -o $@
 
+.PHONY: install
 install:lib$(TARGET_NAME).so lib$(TARGET_NAME).a
 	$(info installing files)
 	@mkdir -p $(DESTDIR)$(PREFIX)/$(LIB_DIR)
@@ -118,5 +119,30 @@ install:lib$(TARGET_NAME).so lib$(TARGET_NAME).a
 	@cp $(OUT_DIR)/lib$(LIBRARY_NAME).a $(DESTDIR)$(PREFIX)/$(LIB_DIR)
 	@cp -R include/aisl $(DESTDIR)$(PREFIX)/include
 
+.PHONY: clean
 clean:
 	rm -R ./$(OUT_DIR)/
+
+# -----------------------------------------------------------------------------
+
+QUICKSTART_PATH := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
+QUICKSTART_NAME := $(shell basename $$PWD)
+
+quickstart: init run
+
+.PHONY: init
+init:
+ifneq ($(wildcard Makefile),)
+	@echo "ERROR: AISL project could not be initialized in current directory:"
+	@echo "Makefile already exists"
+	exit 1
+endif
+	@echo "Initialize $(QUICKSTART_NAME)"
+	@cp -r $(QUICKSTART_PATH)bare/Makefile ./
+	@cp -r $(QUICKSTART_PATH)bare/src ./
+
+.PHONY: run
+run:
+	@make -s run
+
+# -----------------------------------------------------------------------------
