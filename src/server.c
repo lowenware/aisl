@@ -6,7 +6,9 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <fcntl.h>
+#if AISL_WITH_SSL == 1
 #include <openssl/ssl.h>
+#endif
 
 #ifdef __APPLE__
 #include <sys/ioctl.h>

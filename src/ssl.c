@@ -5,7 +5,9 @@
  * Distributed under terms of the MIT license.
  */
 
+#if AISL_WITH_SSL == 1
 #include <openssl/err.h>
+#endif
 #include "str-utils.h"
 #include "instance.h"
 #include "ssl.h"
