@@ -25,8 +25,8 @@
 
 #include <aisl/config.h>
 #include <aisl/types.h>
+#if AISL_WITH_SSL == 1
 #include <openssl/ssl.h>
-
 
 struct aisl_ssl {
 	char    *key_file;
@@ -50,5 +50,6 @@ aisl_ssl_get_ctx(struct aisl_ssl *ssl, void *p_instance);
 void
 aisl_ssl_free(struct aisl_ssl *ssl);
 
+#endif
 
 #endif /* !AISL_SSL_H */
